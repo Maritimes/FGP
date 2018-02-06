@@ -1,0 +1,10 @@
+FGP 2018.02.06 
+==============
+
+Changes:
+
+* Replaced parameter "rec_Start = 0" to "n_rec = 0" for get_DFO_REST(). The
+purpose of this parameter is to facilitate debugging, but rec_Start required 
+prior knowledge of how many records already existed (since it returned records 
+starting at "rec_Start".  "n_recs" just gets the first n records, so it's 
+simpler. The default value of 0 still gets all records.

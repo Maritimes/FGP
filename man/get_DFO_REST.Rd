@@ -5,7 +5,7 @@
 \title{get_DFO_REST}
 \usage{
 get_DFO_REST(service = "ADAPT_Canada_Atlantic_Summer_2016", save_csv = TRUE,
-  rec_Start = 0)
+  n_rec = 0)
 }
 \arguments{
 \item{service}{The default value is
@@ -16,8 +16,8 @@ which you want to extract data.}
 extracted data is saved to a csv file in your working directory.  If
 \code{FALSE}, no csv will be created.}
 
-\item{rec_Start}{The default is \code{0}.  Primarily for debugging, this
-allows the user to select only some of the records, rather than doing a full
+\item{n_rec}{The default is \code{0}.  Primarily for debugging, this
+allows the user to select only some records, rather than doing a full
 extraction.}
 }
 \description{
@@ -26,6 +26,10 @@ ESRI REST services into R objects and other formats.
 By default, the REST services only allow the extraction of 1000 records at a 
 time, and this function does many successive extractions, and merges the
 records together into a single object.
+}
+\seealso{
+Other ArcGIS: \code{\link{pullDFOGIS}},
+  \code{\link{pullDFOREST}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
