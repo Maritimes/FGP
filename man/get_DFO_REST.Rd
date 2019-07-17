@@ -4,12 +4,13 @@
 \alias{get_DFO_REST}
 \title{get_DFO_REST}
 \usage{
-get_DFO_REST(service = "ADAPT_Canada_Atlantic_Summer_2016", save_csv = TRUE,
-  n_rec = 0)
+
+  get_DFO_REST(service = "SciencePublicationsCSAS/ADAPT_Canada_Atlantic_Summer_2018",
+  save_csv = TRUE, n_rec = 0)
 }
 \arguments{
 \item{service}{The default value is
-\code{'ADAPT_Canada_Atlantic_Summer_2016'}.  This identifies the service from
+\code{'SciencePublicationsCSAS/ADAPT_Canada_Atlantic_Summer_2018'}.  This identifies the folder and service from
 which you want to extract data.}
 
 \item{save_csv}{The default value is \code{TRUE}, which means that the
@@ -28,9 +29,10 @@ time, and this function does many successive extractions, and merges the
 records together into a single object.
 }
 \seealso{
-Other ArcGIS: \code{\link{pullDFOGIS}},
-  \code{\link{pullDFOREST}}
+Other ArcGIS: \code{\link{getGeoDataJSON}},
+  \code{\link{getGeoData}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
+\concept{ArcGIS}

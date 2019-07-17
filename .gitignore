@@ -33,3 +33,5 @@ data/*.RData
 *.prj
 *.dbf
 *.lock
+
+inst/*

@@ -5,7 +5,7 @@
 #' time, and this function does many successive extractions, and merges the
 #' records together into a single object.  
 #' @param service  The default value is
-#' \code{'ADAPT_Canada_Atlantic_Summer_2016'}.  This identifies the service from
+#' \code{'SciencePublicationsCSAS/ADAPT_Canada_Atlantic_Summer_2018'}.  This identifies the folder and service from
 #' which you want to extract data.
 #' @param save_csv The default value is \code{TRUE}, which means that the
 #' extracted data is saved to a csv file in your working directory.  If
@@ -20,9 +20,9 @@
 #' @importFrom utils txtProgressBar
 #' @importFrom utils write.csv
 #' @export
-get_DFO_REST <-function(service='ADAPT_Canada_Atlantic_Summer_2016', save_csv=TRUE, n_rec = 0) {
+get_DFO_REST <-function(service='SciencePublicationsCSAS/ADAPT_Canada_Atlantic_Summer_2018', save_csv=TRUE, n_rec = 0) {
   timer.start=proc.time() #start timing, for science!
-  base_url= paste0('http://geoportal-geoportail.gc.ca/arcgis/rest/services/FGP/',service,'/MapServer/0/')
+  base_url= paste0('http://geoportal-geoportail.gc.ca/arcgis/rest/services/',service,'/MapServer/0/')
   extr_Lim = 1000 #can get this many at a time
   
   #total number of records available
