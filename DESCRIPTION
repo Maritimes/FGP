@@ -1,14 +1,14 @@
 Package: FGP
 Type: Package
 Title: Tools Facilitating the Extraction of Data from the DFO REST services
-Version: 2018.02.06
+Version: 2019.07.19
 Authors@R: c( person("Mike", "McMahon", email="Mike.McMahon@dfo-mpo.gc.ca", role=c("aut", "cre")) )
 Maintainer: Mike McMahon <Mike.McMahon@dfo-mpo.gc.ca>
 Description: This package contains functions facilitating working with data 
     from the Department of Fisheries and Oceans (DFO) REST services.
-Imports:    
+Imports: 
     jsonlite
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
