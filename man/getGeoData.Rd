@@ -4,7 +4,7 @@
 \alias{getGeoData}
 \title{getGeoData}
 \usage{
-getGeoData(theService = NULL, filt = NULL)
+getGeoData(theService = NULL, filt = NULL, extr_Lim = 1000)
 }
 \arguments{
 \item{theService}{This specifies which service is being requested. The 
@@ -15,6 +15,10 @@ default is \code{NULL}, but the only current, valid value is
 data from, and the appropriate values for any particular field(s).  The format 
 is \code{tableName1.fieldName1:<value1,value2>&tableName1.fieldName2:<value1,value2>&tableName3.fieldName1:<value1,value2>} 
 Please see the example for a real example.}
+
+\item{extr_Lim}{default is \code{1000}.  This identifies how many records can 
+be extracted in a single pull from the WFS service.  Unless you know that the 
+value is something else, it should be left at 1000.}
 }
 \description{
 This function can pull data down from a GeoData service on the 
@@ -25,8 +29,7 @@ determine what data is returned.
 getGeoData(theService="FGP/Groundfish_WFS_Service", filt="Groundfish_GSSPECIES.CODE:10,11,12&Groundfish_GSMISSIONS.YEAR:2015,2016,2017&Groundfish_GSMISSIONS.SEASON:SUMMER")
 }
 \seealso{
-Other ArcGIS: \code{\link{getGeoDataJSON}},
-  \code{\link{get_DFO_REST}}
+Other ArcGIS: \code{\link{get_DFO_REST}}
 }
 \author{
 Mike McMahon

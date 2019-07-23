@@ -29,8 +29,7 @@ time, and this function does many successive extractions, and merges the
 records together into a single object.
 }
 \seealso{
-Other ArcGIS: \code{\link{getGeoDataJSON}},
-  \code{\link{getGeoData}}
+Other ArcGIS: \code{\link{getGeoData}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

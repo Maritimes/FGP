@@ -1,8 +1,10 @@
-FGP 2018.02.06 
+FGP 2019.07.23
 ==============
 
 Changes:
-
+* added getGeoData() for pulling records from Geodata services.  Built a 
+paginator to extract large tables 1000 records at a time.  This is slow, but is 
+a limitation imposed by the folks making the ESRI rest service.
 * Replaced parameter "rec_Start = 0" to "n_rec = 0" for get_DFO_REST(). The
 purpose of this parameter is to facilitate debugging, but rec_Start required 
 prior knowledge of how many records already existed (since it returned records 

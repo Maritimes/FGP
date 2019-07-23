@@ -1,7 +1,7 @@
 Package: FGP
 Type: Package
 Title: Tools Facilitating the Extraction of Data from the DFO REST services
-Version: 2019.07.19
+Version: 2019.07.23
 Authors@R: c( person("Mike", "McMahon", email="Mike.McMahon@dfo-mpo.gc.ca", role=c("aut", "cre")) )
 Maintainer: Mike McMahon <Mike.McMahon@dfo-mpo.gc.ca>
 Description: This package contains functions facilitating working with data 

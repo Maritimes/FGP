@@ -32,13 +32,13 @@ get_DFO_REST <-function(service='SciencePublicationsCSAS/ADAPT_Canada_Atlantic_S
                                                 \nYou can try visiting the following url in your browser to see if there\'s any additional information:
                                                 \n',base_url))
   rec_Avail = json_cnt$count
-  cat(paste0(rec_Avail,' records available'))
+  cat('\n',rec_Avail,' records available')
   if (n_rec==0){
     wanted = rec_Avail
-    cat('Starting complete extraction')
+    cat('\nStarting complete extraction')
   }else{
     wanted = n_rec
-    cat(paste0('Starting extraction of first ',n_rec,' records'))
+    cat('\nStarting extraction of first ',n_rec,' records')
   }
 
   pb = txtProgressBar(min=0,
@@ -50,7 +50,7 @@ get_DFO_REST <-function(service='SciencePublicationsCSAS/ADAPT_Canada_Atlantic_S
       extr_Lim<-(wanted-rec_Start)
     }
     this_pull <- paste0(base_url,'query?where=OBJECTID%3E=0&f=pjson&returnCountOnly=false&returnGeometry=false&outFields=*&resultOffset=',rec_Start,'&resultRecordCount=',extr_Lim)
-    this_data <- jsonlite::fromJSON(this_pull)
+         this_data <- jsonlite::fromJSON(this_pull)
     if(i==1){    #first resultset, instantiate df
       this.df=this_data$features$attributes
     }else{       # add to existing df

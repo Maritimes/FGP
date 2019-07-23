@@ -9,6 +9,9 @@
 #' data from, and the appropriate values for any particular field(s).  The format 
 #' is \code{tableName1.fieldName1:<value1,value2>&tableName1.fieldName2:<value1,value2>&tableName3.fieldName1:<value1,value2>} 
 #' Please see the example for a real example.
+#' @param extr_Lim default is \code{1000}.  This identifies how many records can 
+#' be extracted in a single pull from the WFS service.  Unless you know that the 
+#' value is something else, it should be left at 1000.
 #' @author Mike McMahon 
 #' @examples
 #' getGeoData(theService="FGP/Groundfish_WFS_Service", filt="Groundfish_GSSPECIES.CODE:10,11,12&Groundfish_GSMISSIONS.YEAR:2015,2016,2017&Groundfish_GSMISSIONS.SEASON:SUMMER")
@@ -17,8 +20,9 @@
 #' @importFrom xml2 xml_name
 #' @importFrom xml2 xml_children
 #' @export
-getGeoData<-function(theService=NULL, filt = NULL){
+getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
   start = Sys.time()
+  baseURL = paste0("http://geoportal.gc.ca/arcgis/services/",theService,"/GeoDataServer/WFSServer?SERVICE=WFS&VERSION=2.1.0")
   filts=list()
   filt=strsplit(filt,split = "&")[[1]]
   df <- data.frame(matrix(ncol = 3, nrow = 0))
@@ -28,7 +32,7 @@ getGeoData<-function(theService=NULL, filt = NULL){
     df[f,"FIELD"]<-sub('.*\\.(.*):.*','\\1',filt[f])
     df[f,"VALUES"]<-sub('.*:','',filt[f])
   }
-  
+
   fieldHandler<-function(fieldDF){
     TEMPL_filt = "<ogc:PropertyIsEqualTo>
   <ogc:PropertyName>::theField::</ogc:PropertyName>
@@ -49,36 +53,26 @@ getGeoData<-function(theService=NULL, filt = NULL){
     }
     return(this)
   } 
-  
-  tableHandler<-function(tabDF, theService){
-    TEMPL_url = paste0("http://geoportal.gc.ca/arcgis/services/",theService,"/GeoDataServer/WFSServer?SERVICE=WFS&VERSION=1.1.0&request=GetFeature&typeName=::theTable::")
+  tableHandler<-function(baseURL, tabDF, theService){
+    TEMPL_url = paste0(baseURL, "&request=GetFeature&typeName=::theTable::")
     thisURL = gsub(pattern = "::theTable::",replacement = unique(tabDF$TABLE), x = TEMPL_url)
+    chk = length(unique(c(tabDF$TABLE,tabDF$FIELD,tabDF$VALUES)))
+    if (chk ==1)return(thisURL)
     u_f = unique(tabDF$FIELD)
-    if ("ALL" %in% u_f){
-      FINAL_url = thisURL
-    }else{
-      allFieldFilts = ""
-      for (f in 1:length(u_f)){
-        fieldDF = tabDF[tabDF$FIELD==u_f[f],]
-        fieldFilt = fieldHandler(fieldDF)
-        allFieldFilts = paste0(allFieldFilts, fieldFilt)
-      }
-      if (length(u_f)>1) allFieldFilts = paste0("<ogc:And>",allFieldFilts,"</ogc:And>")
-      allFieldFilts = paste0("<ogc:Filter>",allFieldFilts,"</ogc:Filter>")
-      FINAL_url = paste0(thisURL,"&FILTER='",URLencode(allFieldFilts),"'")
+    allFieldFilts = ""
+    for (f in 1:length(u_f)){
+      fieldDF = tabDF[tabDF$FIELD==u_f[f],]
+      fieldFilt = fieldHandler(fieldDF)
+      allFieldFilts = paste0(allFieldFilts, fieldFilt)
     }
+    if (length(u_f)>1) allFieldFilts = paste0("<ogc:And>",allFieldFilts,"</ogc:And>")
+    allFieldFilts = paste0("<ogc:Filter>",allFieldFilts,"</ogc:Filter>")
+    FINAL_url = paste0(thisURL,"&FILTER='",URLencode(allFieldFilts),"'")
     return(FINAL_url) 
   } 
-  u_t = unique(df$TABLE)
-  allTableFilts=list()
-  
-  for (t in 1:length(u_t)){
-    thisTabDF = df[df$TABLE==u_t[t],]
-    thisTableQuery = tableHandler(thisTabDF, theService)
-    allTableFilts[[t]]=thisTableQuery
-  }
   
   getData <- function(url){
+    baseURL =  sub('&request=.*','\\1',url)
     svcName = sub('.*arcgis\\/services\\/(.*)\\/GeoDataServer.*','\\1',url)
     svcName = sub(pattern = "/",replacement = "_",x = svcName)
     if (length(grep(pattern = "FILTER=",x = url))>0){
@@ -87,55 +81,49 @@ getGeoData<-function(theService=NULL, filt = NULL){
       #No filter applied cause we're getting whole table
       tblName = sub('.*&typeName=(.*)','\\1',url)
     }
-    
     if (nchar(url)>2000)stop("Your request generated a URL that is too long to be handled")
     cnt  <- tryCatch(
       {
-        as.numeric(xml2::xml_attr(xml2::read_xml(paste0(url,"&resultType=hits")),"numberOfFeatures"))
+        as.numeric(xml2::xml_attr(xml2::read_xml(paste0(baseURL,"&request=GetFeature&typeName=",tblName,"&f=pjson&resultType=hits")),"numberOfFeatures"))
       }
     )
-    if(cnt>1000){
-      extr_Lim = 1000 #can get this many at a time
-      #&resultType=hits
-      #count=N&
-      #  sortBy=attribute
-      #&startIndex=0&count=5
-      #GSCAT =  213038
-      #GSDET = 2056813
-      cat("\nMore than 100 recs - multi-pull starting")
-      pb = txtProgressBar(min=0,
-                          max=ceiling(cnt/extr_Lim),
-                          style = 3)
+    if(cnt>extr_Lim){
       rec_Start=0
-      df = data.frame()
-      for (i in 1:2){ #cnt){ #ceiling(cnt/extr_Lim)){
+      print(paste0("\n",cnt," records exist.  Pulling ",extr_Lim," recs at a time."))
+      pb = txtProgressBar(min=0, max=ceiling(cnt/extr_Lim), style = 3)
+      for (i in 1:ceiling(cnt/extr_Lim)){
         if ((cnt-rec_Start) < extr_Lim){
           extr_Lim<-(cnt-rec_Start)
         }
-        
-        this_pull <- paste0(url,"&startIndex=",rec_Start,"&count=",extr_Lim)
-        # print(this_pull)
-        #browser()
-        allRecs_this <- xml2::read_xml(this_pull)
-        names =  unique(xml2::xml_name(xml2::xml_children(xml2::xml_children(xml2::xml_children(allRecs_this)))))
-        thisPullDF <- data.frame(matrix(ncol = length(names), nrow = 0))
-        
-        colnames(thisPullDF) <- names
-        for (r in 1:length(allRecs_this)){
-          thisPullDF[r,xml2::xml_name(xml2::xml_children(xml2::xml_children(xml2::xml_children(allRecs_this))[r]))]<-xml2::xml_text(xml2::xml_children(xml2::xml_children(xml2::xml_children(allRecs_this))[r]))
+        this_pull <- paste0(url,'&startIndex=',rec_Start,'&count=',extr_Lim)
+        theseRecs = xml2::read_xml(this_pull)
+        theseRecs <- tryCatch(
+          {
+            xml2::xml_find_all(theseRecs,paste0("//",svcName,":",tblName))
+          },
+          error=function(cond){
+          }
+        )
+        if(length(theseRecs)<1)return(NULL)
+        #create an empty dataframe with the possible column names
+        names =  unique(xml2::xml_name(xml2::xml_children(theseRecs)))
+        if (i ==1){
+          df_master <- data.frame(matrix(ncol = length(names), nrow = 0))
+          colnames(df_master) <- names
         }
+        df_this = df_master[FALSE,]
+        for (r in 1:length(theseRecs)){
+          df_this[r,xml2::xml_name(xml2::xml_children(theseRecs[[r]]))]<-xml2::xml_text(xml2::xml_children(theseRecs[[r]]))
+        }
+        df_master = rbind(df_master, df_this)
         rec_Start = rec_Start+extr_Lim
-        df = rbind(df,thisPullDF)
         Sys.sleep(0.1)
         setTxtProgressBar(pb, i)
       }
       close(pb)
-      
     }else{
-      
-      
       results = xml2::read_xml(url)
-      print("\ngot the xml")
+      cat("\ngot the xml")
       allRecs <- tryCatch(
         {
           xml2::xml_find_all(results,paste0("//",svcName,":",tblName))
@@ -146,26 +134,32 @@ getGeoData<-function(theService=NULL, filt = NULL){
       if(length(allRecs)<1)return(NULL)
       #create an empty dataframe with the possible column names
       names =  unique(xml2::xml_name(xml2::xml_children(allRecs)))
-      df <- data.frame(matrix(ncol = length(names), nrow = 0))
-      colnames(df) <- names
-      
+      df_master <- data.frame(matrix(ncol = length(names), nrow = 0))
+      colnames(df_master) <- names
       #fill in the dataframe row by row
       for (r in 1:length(allRecs)){
-        df[r,xml2::xml_name(xml2::xml_children(allRecs[[r]]))]<-xml2::xml_text(xml2::xml_children(allRecs[[r]]))
+        df_master[r,xml2::xml_name(xml2::xml_children(allRecs[[r]]))]<-xml2::xml_text(xml2::xml_children(allRecs[[r]]))
       }
-      
     }
-    res=list(tblName,df)
+    res=list(tblName,df_master)
     return(res)
   }
-  data=list()
   
+  u_t = unique(df$TABLE)
+  allTableFilts=list()
+  
+  for (t in 1:length(u_t)){
+    thisTabDF = df[df$TABLE==u_t[t],]
+    thisTableQuery = tableHandler(baseURL, thisTabDF, theService)
+    allTableFilts[[t]]=thisTableQuery
+  }
+  data=list()
   for (u in 1:length(allTableFilts)){
     this = getData(allTableFilts[[u]])
     if (is.null(this))return(NULL)
     data[[this[[1]]]]<-this[[2]]
     rm(this)  
-    #pb <- txtProgressBar(min = 0, max = length(allTableFilts), style = 3)
+    # pb <- txtProgressBar(min = 0, max = length(allTableFilts), style = 3)
     # setTxtProgressBar(pb, u)
   }
   cat(paste0("\nCompleted in ",format(.POSIXct(difftime(Sys.time(), start, units="secs"),tz="GMT"), "%H:%M:%S"),"\n"))
