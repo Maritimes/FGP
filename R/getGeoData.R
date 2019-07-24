@@ -32,7 +32,6 @@ getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
     df[f,"FIELD"]<-sub('.*\\.(.*):.*','\\1',filt[f])
     df[f,"VALUES"]<-sub('.*:','',filt[f])
   }
-
   fieldHandler<-function(fieldDF){
     TEMPL_filt = "<ogc:PropertyIsEqualTo>
   <ogc:PropertyName>::theField::</ogc:PropertyName>
@@ -72,24 +71,23 @@ getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
   } 
   
   getData <- function(url){
-    baseURL =  sub('&request=.*','\\1',url)
     svcName = sub('.*arcgis\\/services\\/(.*)\\/GeoDataServer.*','\\1',url)
     svcName = sub(pattern = "/",replacement = "_",x = svcName)
     if (length(grep(pattern = "FILTER=",x = url))>0){
       tblName = sub('.*&typeName=(.*)&FILTER=.*','\\1',url)
-    }else{
+      }else{
       #No filter applied cause we're getting whole table
       tblName = sub('.*&typeName=(.*)','\\1',url)
-    }
+      }
     if (nchar(url)>2000)stop("Your request generated a URL that is too long to be handled")
     cnt  <- tryCatch(
       {
-        as.numeric(xml2::xml_attr(xml2::read_xml(paste0(baseURL,"&request=GetFeature&typeName=",tblName,"&f=pjson&resultType=hits")),"numberOfFeatures"))
+        as.numeric(xml2::xml_attr(xml2::read_xml(paste0(url,"&f=pjson&resultType=hits")),"numberOfFeatures"))
       }
     )
     if(cnt>extr_Lim){
       rec_Start=0
-      print(paste0("\n",cnt," records exist.  Pulling ",extr_Lim," recs at a time."))
+     writeLines(paste0("\n",cnt," records exist.  Pulling ",extr_Lim," recs at a time."))
       pb = txtProgressBar(min=0, max=ceiling(cnt/extr_Lim), style = 3)
       for (i in 1:ceiling(cnt/extr_Lim)){
         if ((cnt-rec_Start) < extr_Lim){
