@@ -75,10 +75,10 @@ getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
     svcName = sub(pattern = "/",replacement = "_",x = svcName)
     if (length(grep(pattern = "FILTER=",x = url))>0){
       tblName = sub('.*&typeName=(.*)&FILTER=.*','\\1',url)
-      }else{
+    }else{
       #No filter applied cause we're getting whole table
       tblName = sub('.*&typeName=(.*)','\\1',url)
-      }
+    }
     if (nchar(url)>2000)stop("Your request generated a URL that is too long to be handled")
     cnt  <- tryCatch(
       {
@@ -87,7 +87,7 @@ getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
     )
     if(cnt>extr_Lim){
       rec_Start=0
-     writeLines(paste0("\n",cnt," records exist.  Pulling ",extr_Lim," recs at a time."))
+      writeLines(paste0("\n",cnt," records exist.  Pulling ",extr_Lim," recs at a time."))
       pb = txtProgressBar(min=0, max=ceiling(cnt/extr_Lim), style = 3)
       for (i in 1:ceiling(cnt/extr_Lim)){
         if ((cnt-rec_Start) < extr_Lim){
@@ -113,7 +113,21 @@ getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
         for (r in 1:length(theseRecs)){
           df_this[r,xml2::xml_name(xml2::xml_children(theseRecs[[r]]))]<-xml2::xml_text(xml2::xml_children(theseRecs[[r]]))
         }
-        df_master = rbind(df_master, df_this)
+        df_master = tryCatch(
+          {
+            rbind(df_master, df_this) 
+          },
+          error=function(cond){
+            #can't rbind to initial df suggests that a new field was encountered
+            #find the new field, add it to master and set it to NA prior to 
+            #trying the rbind again.
+            if (length(setdiff(names(df_this),names(df_master)))>0){
+              newFields = setdiff(names(df_this),names(df_master))
+              df_master[newFields]<-NA
+              rbind(df_master, df_this) 
+            }
+          }
+        )
         rec_Start = rec_Start+extr_Lim
         Sys.sleep(0.1)
         setTxtProgressBar(pb, i)
