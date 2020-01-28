@@ -6,7 +6,7 @@
 \usage{
 get_DFO_REST(
   host = "https://gisp.dfo-mpo.gc.ca",
-  service = "FGP/ADAPT_Canada_Atlantic_Summer_2018",
+  service = "FGP/ADAPT_Canada_Atlantic_Summer_2016",
   save_csv = TRUE,
   n_rec = 0
 )
@@ -15,7 +15,7 @@ get_DFO_REST(
 \item{host}{The default is \code{https://gisp.dfo-mpo.gc.ca}.  This identifies the host  url for the service.}
 
 \item{service}{The default value is
-\code{'FGP/ADAPT_Canada_Atlantic_Summer_2018'}.  This identifies the folder and service from
+\code{'FGP/ADAPT_Canada_Atlantic_Summer_2016'}.  This identifies the folder and service from
 which you want to extract data.}
 
 \item{save_csv}{The default value is \code{TRUE}, which means that the
