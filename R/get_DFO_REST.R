@@ -68,9 +68,9 @@ get_DFO_REST <-function(host = "https://gisp.dfo-mpo.gc.ca", service='FGP/ADAPT_
   elapsed=timer.start-proc.time() #determine runtime
   cat(paste0('\nExtraction of ',nrow(this.df),' records completed in ',round(elapsed[3],0)*-1, ' seconds'))
   if (save_csv){
-    filename = paste0(service,'.csv')
+    filename = paste0(gsub(".*/","",service),'.csv')
     write.csv(this.df,filename, row.names = FALSE)
-    cat(paste0("\ncsv written to ",getwd(), filename))
+    cat(paste0("\ncsv written to ",getwd(), "/",filename))
   }
   return(this.df)
 }
