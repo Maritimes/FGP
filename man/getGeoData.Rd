@@ -29,7 +29,8 @@ determine what data is returned.
 getGeoData(theService="FGP/Groundfish_WFS_Service", filt="Groundfish_GSSPECIES.CODE:10,11,12&Groundfish_GSMISSIONS.YEAR:2015,2016,2017&Groundfish_GSMISSIONS.SEASON:SUMMER")
 }
 \seealso{
-Other ArcGIS: \code{\link{get_DFO_REST}}
+Other ArcGIS: 
+\code{\link{get_DFO_REST}()}
 }
 \author{
 Mike McMahon

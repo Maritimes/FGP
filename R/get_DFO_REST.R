@@ -3,9 +3,10 @@
 #' ESRI REST services into R objects and other formats.  
 #' By default, the REST services only allow the extraction of 1000 records at a 
 #' time, and this function does many successive extractions, and merges the
-#' records together into a single object.  
+#' records together into a single object. 
+#' @param host The default is \code{https://gisp.dfo-mpo.gc.ca}.  This identifies the host  url for the service.
 #' @param service  The default value is
-#' \code{'SciencePublicationsCSAS/ADAPT_Canada_Atlantic_Summer_2018'}.  This identifies the folder and service from
+#' \code{'FGP/ADAPT_Canada_Atlantic_Summer_2018'}.  This identifies the folder and service from
 #' which you want to extract data.
 #' @param save_csv The default value is \code{TRUE}, which means that the
 #' extracted data is saved to a csv file in your working directory.  If
@@ -20,9 +21,9 @@
 #' @importFrom utils txtProgressBar
 #' @importFrom utils write.csv
 #' @export
-get_DFO_REST <-function(service='SciencePublicationsCSAS/ADAPT_Canada_Atlantic_Summer_2018', save_csv=TRUE, n_rec = 0) {
+get_DFO_REST <-function(host = "https://gisp.dfo-mpo.gc.ca", service='FGP/ADAPT_Canada_Atlantic_Summer_2018', save_csv=TRUE, n_rec = 0) {
   timer.start=proc.time() #start timing, for science!
-  base_url= paste0('http://geoportal-geoportail.gc.ca/arcgis/rest/services/',service,'/MapServer/0/')
+  base_url= paste0(host,'/arcgis/rest/services/',service,'/MapServer/0/')
   extr_Lim = 1000 #can get this many at a time
   
   #total number of records available
