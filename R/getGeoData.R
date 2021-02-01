@@ -22,7 +22,8 @@
 #' @export
 getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
   start = Sys.time()
-  baseURL = paste0("http://geoportal.gc.ca/arcgis/services/",theService,"/GeoDataServer/WFSServer?SERVICE=WFS&VERSION=2.1.0")
+  baseURL = paste0("https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/",theService,"/GeoDataServer/WFSServer?SERVICE=WFS&VERSION=2.1.0")
+  #baseURL = paste0("http://geoportal.gc.ca/arcgis/services/",theService,"/GeoDataServer/WFSServer?SERVICE=WFS&VERSION=2.1.0")
   filts=list()
   filt=strsplit(filt,split = "&")[[1]]
   df <- data.frame(matrix(ncol = 3, nrow = 0))
@@ -80,6 +81,7 @@ getGeoData<-function(theService=NULL, filt = NULL, extr_Lim = 1000){
       tblName = sub('.*&typeName=(.*)','\\1',url)
     }
     if (nchar(url)>2000)stop("Your request generated a URL that is too long to be handled")
+    browser()
     cnt  <- tryCatch(
       {
         as.numeric(xml2::xml_attr(xml2::read_xml(paste0(url,"&f=pjson&resultType=hits")),"numberOfFeatures"))
